@@ -1,25 +1,36 @@
-/* Reset CSS */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Styles cho highlight trên trang web */
+.light-highlighter-text {
+    background-color: inherit;  /* Sẽ được ghi đè bởi inline style */
+    border-radius: 2px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    display: inline;  /* Đảm bảo không phá vỡ layout */
+    position: relative;  /* Cho positioning */
+    line-height: inherit;  /* Giữ nguyên line height */
+    font-size: inherit;  /* Giữ nguyên font size */
+    font-family: inherit;  /* Giữ nguyên font */
 }
 
-/* Popup styles */
-body {
+.light-highlighter-text:hover {
+    opacity: 0.8;
+}
+
+/* Styles cho popup - được wrap trong class riêng */
+.light-highlighter-popup {
     width: 400px;
     min-height: 500px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f5f5f5;
     color: #333;
+    margin: 0;
+    padding: 0;
 }
 
-.container {
+.light-highlighter-popup .container {
     padding: 16px;
 }
 
-/* Header styles */
-.header {
+.light-highlighter-popup .header {
     background-color: #2196f3;
     color: white;
     padding: 16px;
@@ -27,17 +38,16 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.header h1 {
+.light-highlighter-popup .header h1 {
     font-size: 1.5rem;
     margin-bottom: 8px;
 }
 
-/* Highlights list styles */
-.highlights-container {
+.light-highlighter-popup .highlights-container {
     margin-top: 16px;
 }
 
-.highlight-item {
+.light-highlighter-popup .highlight-item {
     background: white;
     border-radius: 8px;
     padding: 12px;
@@ -46,17 +56,17 @@ body {
     transition: transform 0.2s ease;
 }
 
-.highlight-item:hover {
+.light-highlighter-popup .highlight-item:hover {
     transform: translateY(-2px);
 }
 
-.highlight-text {
+.light-highlighter-popup .highlight-text {
     font-size: 0.9rem;
     margin-bottom: 8px;
     line-height: 1.4;
 }
 
-.highlight-meta {
+.light-highlighter-popup .highlight-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -64,7 +74,7 @@ body {
     color: #666;
 }
 
-.highlight-url {
+.light-highlighter-popup .highlight-url {
     color: #2196f3;
     text-decoration: none;
     max-width: 200px;
@@ -73,13 +83,12 @@ body {
     white-space: nowrap;
 }
 
-.highlight-actions {
+.light-highlighter-popup .highlight-actions {
     display: flex;
     gap: 8px;
 }
 
-/* Buttons */
-.btn {
+.light-highlighter-popup .btn {
     padding: 6px 12px;
     border: none;
     border-radius: 4px;
@@ -88,46 +97,33 @@ body {
     transition: background-color 0.2s ease;
 }
 
-.btn-delete {
+.light-highlighter-popup .btn-delete {
     background-color: #ff5252;
     color: white;
 }
 
-.btn-delete:hover {
+.light-highlighter-popup .btn-delete:hover {
     background-color: #ff1744;
 }
 
-/* Empty state */
-.empty-state {
+.light-highlighter-popup .empty-state {
     text-align: center;
     padding: 32px 16px;
     color: #666;
 }
 
-.empty-state i {
+.light-highlighter-popup .empty-state i {
     font-size: 48px;
     margin-bottom: 16px;
     color: #ccc;
 }
 
-/* Highlighted text in web pages */
-.light-highlighter-text {
-    border-radius: 2px;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-}
-
-.light-highlighter-text:hover {
-    opacity: 0.8;
-}
-
-/* Loading state */
-.loading {
+.light-highlighter-popup .loading {
     text-align: center;
     padding: 32px 16px;
 }
 
-.loading-spinner {
+.light-highlighter-popup .loading-spinner {
     border: 3px solid #f3f3f3;
     border-top: 3px solid #2196f3;
     border-radius: 50%;
@@ -142,17 +138,17 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive design */
+/* Responsive design cho popup */
 @media (max-width: 480px) {
-    body {
+    .light-highlighter-popup {
         width: 100%;
     }
     
-    .container {
+    .light-highlighter-popup .container {
         padding: 12px;
     }
     
-    .highlight-item {
+    .light-highlighter-popup .highlight-item {
         padding: 10px;
     }
 }
