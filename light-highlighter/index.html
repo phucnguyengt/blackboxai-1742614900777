@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Light Highlighter</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,19 +13,12 @@
     </div>
 
     <div class="container">
-        <div id="loading" class="loading" style="display: none;">
-            <div class="loading-spinner"></div>
-            <p>Loading highlights...</p>
-        </div>
-
-        <div id="highlights-container" class="highlights-container">
-            <!-- Highlights will be inserted here by JavaScript -->
-        </div>
-
-        <div id="empty-state" class="empty-state" style="display: none;">
-            <i class="fas fa-highlighter"></i>
-            <p>No highlights yet</p>
-            <p>Select text on any webpage and right-click to highlight it</p>
+        <div class="highlights-container">
+            <!-- Highlights will be loaded here -->
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading highlights...</p>
+            </div>
         </div>
     </div>
 
