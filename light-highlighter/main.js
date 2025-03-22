@@ -1,107 +1,74 @@
-// DOM Elements
-const highlightsContainer = document.getElementById('highlights-container');
-const loadingElement = document.getElementById('loading');
-const emptyStateElement = document.getElementById('empty-state');
+// Hiển thị danh sách highlight
+async function displayHighlights() {
+  try {
+    const container = document.querySelector('.highlights-container');
+    container.innerHTML = '';
 
-// Format date function
-function formatDate(timestamp) {
-    return new Date(parseInt(timestamp)).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
+    // Lấy highlights từ storage
+    const { highlights = [] } = await chrome.storage.local.get('highlights');
+    
+    if (highlights.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-highlighter"></i>
+          <p>No highlights yet. Select text and right click to highlight!</p>
+        </div>
+      `;
+      return;
+    }
 
-// Create highlight element
-function createHighlightElement(highlight) {
-    const div = document.createElement('div');
-    div.className = 'highlight-item';
-    div.style.borderLeft = `4px solid ${highlight.color}`;
+    // Sắp xếp theo thời gian mới nhất
+    highlights.sort((a, b) => b.timestamp - a.timestamp);
 
-    div.innerHTML = `
+    // Tạo element cho mỗi highlight
+    highlights.forEach(highlight => {
+      const div = document.createElement('div');
+      div.className = 'highlight-item';
+      div.innerHTML = `
         <div class="highlight-text">${highlight.text}</div>
         <div class="highlight-meta">
-            <div>
-                <div>${highlight.title || 'Untitled Page'}</div>
-                <a href="${highlight.url}" class="highlight-url" target="_blank" title="${highlight.url}">
-                    ${new URL(highlight.url).hostname}
-                </a>
-                <div>${formatDate(highlight.timestamp)}</div>
-            </div>
-            <div class="highlight-actions">
-                <button class="btn btn-delete" data-timestamp="${highlight.timestamp}">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+          <a href="${highlight.url}" class="highlight-url" title="${highlight.title}">${highlight.title}</a>
+          <div class="highlight-actions">
+            <button class="btn btn-delete" data-timestamp="${highlight.timestamp}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
         </div>
-    `;
-
-    // Add delete event listener
-    const deleteButton = div.querySelector('.btn-delete');
-    deleteButton.addEventListener('click', async () => {
-        try {
-            const { highlights = [] } = await chrome.storage.local.get('highlights');
-            const updatedHighlights = highlights.filter(h => h.timestamp !== highlight.timestamp);
-            await chrome.storage.local.set({ highlights: updatedHighlights });
-            
-            // Remove the highlight element with animation
-            div.style.opacity = '0';
-            div.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                div.remove();
-                checkEmpty();
-            }, 300);
-        } catch (error) {
-            console.error('Error deleting highlight:', error);
-        }
+      `;
+      container.appendChild(div);
     });
 
-    return div;
-}
-
-// Check if highlights list is empty
-function checkEmpty() {
-    if (highlightsContainer.children.length === 0) {
-        emptyStateElement.style.display = 'block';
-    } else {
-        emptyStateElement.style.display = 'none';
-    }
-}
-
-// Load highlights from storage
-async function loadHighlights() {
-    try {
-        loadingElement.style.display = 'block';
-        highlightsContainer.innerHTML = '';
-
+    // Thêm event listener cho nút xóa
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const timestamp = btn.dataset.timestamp;
         const { highlights = [] } = await chrome.storage.local.get('highlights');
-        
-        // Sort highlights by timestamp (newest first)
-        highlights.sort((a, b) => b.timestamp - a.timestamp);
+        const updatedHighlights = highlights.filter(h => h.timestamp !== timestamp);
+        await chrome.storage.local.set({ highlights: updatedHighlights });
+        displayHighlights();
+      });
+    });
 
-        // Create and append highlight elements
-        highlights.forEach(highlight => {
-            const highlightElement = createHighlightElement(highlight);
-            highlightsContainer.appendChild(highlightElement);
-        });
-
-        checkEmpty();
-    } catch (error) {
-        console.error('Error loading highlights:', error);
-        highlightsContainer.innerHTML = '<div class="error">Error loading highlights</div>';
-    } finally {
-        loadingElement.style.display = 'none';
-    }
+  } catch (error) {
+    console.error('Error displaying highlights:', error);
+    document.querySelector('.highlights-container').innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>Error loading highlights. Please try again.</p>
+      </div>
+    `;
+  }
 }
 
-// Listen for storage changes
-chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'local' && changes.highlights) {
-        loadHighlights();
-    }
-});
+// Khởi tạo popup
+document.addEventListener('DOMContentLoaded', () => {
+  // Hiển thị highlights
+  displayHighlights();
 
-// Initial load
-document.addEventListener('DOMContentLoaded', loadHighlights);
+  // Lắng nghe thay đổi từ storage
+  chrome.storage.onChanged.addListener((changes) => {
+    if (changes.highlights) {
+      displayHighlights();
+    }
+  });
+});
