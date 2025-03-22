@@ -1,62 +1,65 @@
-# Light Highlighter Extension
+# Light Highlighter
 
-Một extension nhẹ nhàng giúp highlight (đánh dấu) văn bản trên các trang web và lưu trữ locally.
+A lightweight Chrome extension for highlighting text on web pages.
 
-## Tính năng
+## Features
 
-- Highlight văn bản với 5 màu khác nhau (vàng, xanh lá, xanh dương, hồng, tím)
-- Lưu trữ highlight locally (không cần server)
-- Quản lý các highlight thông qua popup
-- Phím tắt để bật/tắt chế độ highlight (Alt+H)
-- Double-click để xóa highlight
+- Highlight text with 5 different colors
+- Save highlights locally
+- View all highlights in popup
+- Double-click to remove highlights
+- Keyboard shortcut (Alt+H) to toggle highlight mode
 
-## Cách cài đặt
+## How to Use
 
-1. Tải extension về máy
-2. Mở Chrome/Edge, vào trang Extensions (chrome://extensions hoặc edge://extensions)
-3. Bật chế độ Developer mode
-4. Chọn "Load unpacked" và chọn thư mục chứa extension
+1. Select text you want to highlight
+2. Right click and choose "Highlight Text" from the context menu
+3. Select a color to highlight
+4. View your highlights by clicking the extension icon
+5. Double click on any highlight to remove it
+6. Use Alt+H to toggle highlight mode
 
-## Cách sử dụng
+## Installation
 
-1. Highlight văn bản:
-   - Chọn văn bản cần highlight
-   - Click chuột phải và chọn "Highlight Text" > chọn màu
-   - Hoặc dùng phím tắt Alt+H để bật/tắt chế độ highlight
+1. Download or clone this repository
+2. Open Chrome and go to chrome://extensions/
+3. Enable "Developer mode" in the top right
+4. Click "Load unpacked" and select the extension folder
 
-2. Xem các highlight:
-   - Click vào icon extension trên thanh công cụ
-   - Danh sách highlight sẽ hiện ra, bao gồm nội dung, trang web và thời gian
+## Files Structure
 
-3. Xóa highlight:
-   - Double-click vào highlight trên trang web để xóa
-   - Hoặc click nút xóa trong popup để xóa
+- `manifest.json`: Extension configuration
+- `background.js`: Background service worker
+- `contentPage.js`: Content script for highlighting
+- `main.js`: Popup logic
+- `index.html`: Popup HTML
+- `styles.css`: Styling for popup and highlights
 
-## Cấu trúc thư mục
+## Storage
 
-```
-light-highlighter/
-├── manifest.json        # Cấu hình extension
-├── background.js       # Service worker, xử lý context menu
-├── contentPage.js      # Content script, xử lý highlight trên trang
-├── index.html         # Giao diện popup
-├── main.js           # Logic cho popup
-├── styles.css        # Style cho popup và highlight
-└── assets/
-    └── icons/        # Chứa các icon của extension
-```
+All highlights are saved locally using Chrome's storage API. Data stored includes:
+- Highlighted text
+- URL of the page
+- Page title
+- Timestamp
+- Highlight color
 
-## Yêu cầu về icon
+## Keyboard Shortcuts
 
-Bạn cần thêm các icon vào thư mục `assets/icons` với các kích thước sau:
-- icon16.png (16x16)
-- icon32.png (32x32)
-- icon48.png (48x48)
-- icon128.png (128x128)
+- `Alt+H`: Toggle highlight mode
 
-## Lưu ý
+## Colors Available
 
-- Extension này lưu trữ dữ liệu locally trong chrome.storage.local
-- Không yêu cầu kết nối internet
-- Không hỗ trợ highlight trên file PDF
-- Double-click để xóa highlight có thể không hoạt động trên một số trang web có xử lý double-click riêng
+- Yellow (#ffeb3b)
+- Green (#a5d6a7) 
+- Blue (#90caf9)
+- Pink (#f48fb1)
+- Purple (#ce93d8)
+
+## Notes
+
+- Highlights are saved locally in your browser
+- No internet connection required
+- No account needed
+- Lightweight and fast
+- Privacy focused - no data is sent to any server
