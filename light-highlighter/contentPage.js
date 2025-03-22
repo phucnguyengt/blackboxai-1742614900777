@@ -1,38 +1,25 @@
-// Biến để theo dõi trạng thái highlight mode
-let isHighlightModeEnabled = false;
-
-// Class để quản lý highlights
+// Class quản lý highlight
 class HighlightManager {
   constructor() {
     this.highlightClass = 'light-highlighter-text';
+    this.isHighlightMode = false;
   }
 
   // Tạo highlight mới
   createHighlight(range, color) {
     try {
-      // Kiểm tra xem range có hợp lệ không
-      if (range.collapsed) {
+      // Kiểm tra range hợp lệ
+      if (!range || range.collapsed) {
         throw new Error('No text selected');
       }
 
-      // Kiểm tra xem range có nằm trong một highlight khác không
-      let ancestor = range.commonAncestorContainer;
-      while (ancestor && ancestor.nodeType === Node.ELEMENT_NODE) {
-        if (ancestor.classList.contains(this.highlightClass)) {
-          throw new Error('Cannot highlight within an existing highlight');
-        }
-        ancestor = ancestor.parentNode;
-      }
-
+      // Tạo element highlight
       const span = document.createElement('span');
       span.className = this.highlightClass;
       span.style.backgroundColor = color;
       span.dataset.timestamp = Date.now();
-      
-      // Lưu nội dung gốc trước khi highlight
-      const originalContent = range.cloneContents();
-      
-      // Tạo highlight
+
+      // Wrap range bằng span
       range.surroundContents(span);
 
       // Lưu highlight vào storage
@@ -41,39 +28,21 @@ class HighlightManager {
         color: color,
         url: window.location.href,
         timestamp: span.dataset.timestamp,
-        title: document.title,
-        originalContent: originalContent.textContent // Lưu nội dung gốc
+        title: document.title
       });
 
       return span;
     } catch (error) {
       console.error('Error creating highlight:', error);
-      
-      let errorMessage = 'Could not create highlight. ';
-      if (error.message === 'No text selected') {
-        errorMessage += 'Please select some text first.';
-      } else if (error.message === 'Cannot highlight within an existing highlight') {
-        errorMessage += 'Cannot highlight text that is already highlighted.';
-      } else if (error.message.includes('The given range isn\'t in a single block.')) {
-        errorMessage += 'Please select text within a single paragraph or element.';
-      } else {
-        errorMessage += 'Please try selecting text again.';
-      }
-
-      chrome.runtime.sendMessage({
-        action: 'show-notification',
-        message: errorMessage
-      });
-
       return null;
     }
   }
 
   // Lưu highlight vào storage
-  async saveHighlight(highlightData) {
+  async saveHighlight(highlight) {
     try {
       const { highlights = [] } = await chrome.storage.local.get('highlights');
-      highlights.push(highlightData);
+      highlights.push(highlight);
       await chrome.storage.local.set({ highlights });
     } catch (error) {
       console.error('Error saving highlight:', error);
@@ -86,60 +55,44 @@ class HighlightManager {
       const timestamp = element.dataset.timestamp;
       const { highlights = [] } = await chrome.storage.local.get('highlights');
       
-      // Tìm highlight trong storage
-      const highlightData = highlights.find(h => h.timestamp === timestamp);
-      if (!highlightData) {
-        throw new Error('Highlight not found in storage');
-      }
-
       // Xóa từ storage
       const updatedHighlights = highlights.filter(h => h.timestamp !== timestamp);
       await chrome.storage.local.set({ highlights: updatedHighlights });
 
-      // Khôi phục nội dung gốc
+      // Xóa element và giữ lại text content
       const parent = element.parentNode;
       while (element.firstChild) {
         parent.insertBefore(element.firstChild, element);
       }
       parent.removeChild(element);
-
-      // Thông báo xóa thành công
-      chrome.runtime.sendMessage({
-        action: 'show-notification',
-        message: 'Highlight removed successfully'
-      });
     } catch (error) {
       console.error('Error removing highlight:', error);
-      chrome.runtime.sendMessage({
-        action: 'show-notification',
-        message: 'Error removing highlight. Please try again.'
-      });
     }
+  }
+
+  // Toggle highlight mode
+  toggleHighlightMode() {
+    this.isHighlightMode = !this.isHighlightMode;
+    document.body.style.cursor = this.isHighlightMode ? 'pointer' : 'default';
   }
 }
 
-// Khởi tạo highlight manager
+// Khởi tạo manager
 const highlightManager = new HighlightManager();
 
-// Xử lý tin nhắn từ background script
+// Lắng nghe message từ background
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'highlight') {
     const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      highlightManager.createHighlight(range, request.color);
-      selection.removeAllRanges(); // Clear selection after highlighting
-    }
+    const range = selection.getRangeAt(0);
+    highlightManager.createHighlight(range, request.color);
+    selection.removeAllRanges();
   } else if (request.action === 'toggle-highlight-mode') {
-    isHighlightModeEnabled = !isHighlightModeEnabled;
-    chrome.runtime.sendMessage({
-      action: 'show-notification',
-      message: `Highlight mode ${isHighlightModeEnabled ? 'enabled' : 'disabled'}`
-    });
+    highlightManager.toggleHighlightMode();
   }
 });
 
-// Thêm double-click listener để xóa highlight
+// Double click để xóa highlight
 document.addEventListener('dblclick', (event) => {
   if (event.target.classList.contains(highlightManager.highlightClass)) {
     highlightManager.removeHighlight(event.target);
